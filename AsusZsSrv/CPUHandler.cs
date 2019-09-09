@@ -1,39 +1,3 @@
-﻿/*
-// Feature Control Defines
-#define FEATURE_CCLK_CONTROLLER_BIT    0
-#define FEATURE_FAN_CONTROLLER_BIT     1
-#define FEATURE_DATA_CALCULATION_BIT   2
-#define FEATURE_PPT_BIT                3
-#define FEATURE_TDC_BIT                4
-#define FEATURE_THERMAL_BIT            5
-#define FEATURE_FIT_BIT                6
-#define FEATURE_QOS_BIT                7
-#define FEATURE_CORE_CSTATES_BIT       8
-#define FEATURE_PROCHOT_BIT            9
-#define FEATURE_MCM_DATA_TRANSFER_BIT  10
-#define FEATURE_DLWM_BIT               11
-#define FEATURE_PC6_BIT                12
-#define FEATURE_CSTATE_BOOST_BIT       13
-#define FEATURE_VOLTAGE_CONTROLLER_BIT 14
-#define FEATURE_HOT_PLUG_BIT           15
-#define FEATURE_SPARE_16_BIT           16
-#define FEATURE_FW_DEEPSLEEP_BIT       17
-#define FEATURE_SPARE_18_BIT           18
-#define FEATURE_SPARE_19_BIT           19
-#define FEATURE_SPARE_20_BIT           20
-#define FEATURE_SPARE_21_BIT           21
-#define FEATURE_SPARE_22_BIT           22
-#define FEATURE_SPARE_23_BIT           23
-#define FEATURE_SPARE_24_BIT           24
-#define FEATURE_SPARE_25_BIT           25
-#define FEATURE_SPARE_26_BIT           26
-#define FEATURE_SPARE_27_BIT           27
-#define FEATURE_SPARE_28_BIT           28
-#define FEATURE_SPARE_29_BIT           29
-#define FEATURE_SPARE_30_BIT           30
-#define FEATURE_SPARE_31_BIT           31
-*/
-
 using System;
 using System.IO;
 using System.Configuration;
@@ -49,7 +13,6 @@ namespace AsusZsSrv
 	{
 		public enum CPUType { Unsupported=0, DEBUG=1, Summit_Ridge, Threadripper, Raven_Ridge, Pinnacle_Ridge };
 		public enum PerfBias { None=0, Cinebench_R15, Cinebench_R11p5, Geekbench_3 };
-        //public enum PerfEnh { None = 0, Level1, Level2, Level3_OC, Level4_OC };
 
         // MSR
         const UInt32 MSR_PStateStat = 0xC0010063; // [2:0] CurPstate
@@ -84,8 +47,6 @@ namespace AsusZsSrv
         const UInt32 THM_TCON_CUR_TMP = 0x00059800;
         const UInt32 THM_TCON_THERM_TRIP = 0x00059808;
 
-        const UInt32 SMC_MSG_EnableSmuFeatures = 0x09;
-        const UInt32 SMC_MSG_DisableSmuFeatures = 0x0A;
         const UInt32 SMC_MSG_SetPPTLimit = 0x31;
         const UInt32 SMC_MSG_TCTL_OFFSET = 0x3A;
         const UInt32 SMC_MSG_SetTDCLimit = 0x43;
@@ -138,7 +99,6 @@ namespace AsusZsSrv
         public int ZenEDC = 0;
         public int ZenScalar = 1;
 
-        //public CPUHandler.PerfEnh PerformanceEnhancer = 0;
         public CPUHandler.PerfBias PerformanceBias = 0;
 
         public CPUHandler()
@@ -598,144 +558,6 @@ namespace AsusZsSrv
             return res;
 
         }
-
-        /*public bool SetPerfEnhancer(PerfEnh pe) {
-            bool res = true;
-            //if(pe == PerformanceEnhancer) return true;
-
-            // Mutex
-            res = hMutexPci.WaitOne(5000);
-
-            // Level 1/2/3/4
-            if(res && cpuType == CPUType.Pinnacle_Ridge) {
-                UInt32 ppt = 0, tdc = 0, edc = 0, scalar = 0;
-                switch(pe) {
-                    case PerfEnh.None:
-                        ppt = 0;
-                        tdc = 0;
-                        edc = 0;
-                        scalar = 1;
-                        break;
-                    case PerfEnh.Level1:
-                        ppt = 1000000;
-                        tdc = 1000000;
-                        edc = 150000;
-                        scalar = 10;
-                        break;
-                    case PerfEnh.Level2:
-                        ppt = 1000000;
-                        tdc = 1000000;
-                        edc = 1000000;
-                        scalar = 10;
-                        break;
-                    case PerfEnh.Level3_OC:
-                        ppt = 1000000;
-                        tdc = 1000000;
-                        edc = 150000;
-                        scalar = 1;
-                        break;
-                    case PerfEnh.Level4_OC:
-                        ppt = 1000000;
-                        tdc = 1000000;
-                        edc = 1000000;
-                        scalar = 1;
-                        break;
-                    default:
-                        break;
-                }
-
-                // Clear response
-                res = SmuWriteReg(SMU_ADDR_RSP, 0);
-                if(res) {
-                    // Set arg0
-                    res = SmuWriteReg(SMU_ADDR_ARG0, ppt);
-                    if(res) {
-                        // Send message
-                        res = SmuWriteReg(SMU_ADDR_MSG, SMC_MSG_SetPPTLimit);
-                        if(res) {
-                            // Wait for completion
-                            res = SmuWaitDone();
-                            if(res) {
-                                res = SmuWriteReg(SMU_ADDR_RSP, 0);
-                                if(res) {
-                                    res = SmuWriteReg(SMU_ADDR_ARG0, tdc);
-                                    if(res) {
-                                        res = SmuWriteReg(SMU_ADDR_MSG, SMC_MSG_SetTDCLimit);
-                                        if(res) {
-                                            res = SmuWaitDone();
-                                            if(res) {
-                                                res = SmuWriteReg(SMU_ADDR_RSP, 0);
-                                                if(res) {
-                                                    res = SmuWriteReg(SMU_ADDR_ARG0, edc);
-                                                    if(res) {
-                                                        res = SmuWriteReg(SMU_ADDR_MSG, SMC_MSG_SetEDCLimit);
-                                                        if(res) {
-                                                            res = SmuWaitDone();
-                                                            if(res) {
-                                                                res = SmuWriteReg(SMU_ADDR_RSP, 0);
-                                                                if(res) {
-                                                                    res = SmuWriteReg(SMU_ADDR_ARG0, scalar);
-                                                                    if(res) {
-                                                                        res = SmuWriteReg(SMU_ADDR_MSG, SMC_MSG_SetFITLimitScalar);
-                                                                        if(res) {
-                                                                            res = SmuWaitDone();
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Level 3/4
-            /*if(res) {
-                // Clear response
-                res = SmuWriteReg(SMU_ADDR_RSP, 0);
-                if(res) {
-
-                    // Arg0 0x3B10598
-                    res = SmuWriteReg(SMU_ADDR_ARG0, 0x1C);
-                    if(res) {
-
-                        // Arg1 0x03B1059C
-                        for(int i = 0; i < 5 && res; i++) {
-                            res = SmuWriteReg(SMU_ADDR_ARG1, 0);
-                        }
-
-                        if(res) {
-                            switch(pe) {
-                                case PerfEnh.Level3_OC:
-                                case PerfEnh.Level4_OC:
-                                    res = SmuWriteReg(SMU_ADDR_MSG, SMC_MSG_DisableSmuFeatures); break;
-                                default:
-                                    res = SmuWriteReg(SMU_ADDR_MSG, SMC_MSG_EnableSmuFeatures); break;
-                            }
-
-                            if(res) {
-                                res = SmuWaitDone();
-                            }
-
-                        }
-                    }
-                }
-            }
-
-            hMutexPci.ReleaseMutex();
-
-            if(res) PerformanceEnhancer = pe;
-
-            return res;
-            
-        }*/
         
         private bool SmuWriteReg(UInt32 addr, UInt32 data) {
             int res = 0;
