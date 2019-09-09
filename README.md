@@ -1,4 +1,4 @@
-# ASUS ZenStates
+# ZenStates
 
 This project was originally created to enable simple P-state overclocking on ASUS AM4 motherboards from the OS. It's no longer maintained but may be freely used as a base or for parts for anyone interested in continuing this project.
 
