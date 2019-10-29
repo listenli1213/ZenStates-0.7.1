@@ -18,12 +18,12 @@ namespace ServiceInstaller
 			// Check if install or uninstall
 			string[] install_args;
 			if(args.Length > 0 && args[0] == "/uninstall") {
-				install_args = new string[]{ "/U", "AsusTCsrv.exe" };
-				Console.WriteLine("Uninstalling AsusTCsrv ...");
+				install_args = new string[]{ "/U", "AsusZsSrv.exe" };//Listenli Modify 20191029
+				Console.WriteLine("Uninstalling AsusZsSrv ...");//Listenli Modify 20191029
 			}
 			else {
-				install_args = new string[]{ "AsusTCsrv.exe" };
-				Console.WriteLine("Installing AsusTCsrv ...");
+				install_args = new string[]{ "AsusZsSrv.exe" };//Listenli Modify 20191029
+				Console.WriteLine("Installing AsusZsSrv ...");//Listenli Modify 20191029
 			}
 			
 			ManagedInstallerClass.InstallHelper(install_args);
